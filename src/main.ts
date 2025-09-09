@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,10 +13,31 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.use((req, res, next) => {
+    res.header('Content-Type', 'application/json');
+    res.header('Accept', 'application/json');
+    next();
+  });
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,
+    exceptionFactory: (errors) => {
+      const firstError = errors[0];
+      const constraint = firstError.constraints ? 
+        Object.values(firstError.constraints)[0] : 
+        'Validation failed';
+      return {
+        status: 400,
+        error: 'BAD_REQUEST',
+        message: 'Validation failed',
+        details: constraint,
+        field: firstError.property
+      };
+    }
   }));
+  
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('Vinyl Store API')
