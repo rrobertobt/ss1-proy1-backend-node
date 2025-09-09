@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      target: builder # Use builder stage for development
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_NAME=${DB_NAME:-vinyl_store}
+    volumes:
+      - ./:/app:delegated
+      - /app/node_modules
+      # Named volume for node_modules to prevent Windows path issues
+      - nodemodules:/app/node_modules
+    depends_on:
+      - postgres
+    # Use more reliable path for Windows compatibility
+    command: sh -c "npm run start:dev"
+    # Enable Docker for Windows path conversion
+    environment:
+      - COMPOSE_CONVERT_WINDOWS_PATHS=1
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_NAME:-vinyl_store}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local
+  nodemodules:
+    driver: local
