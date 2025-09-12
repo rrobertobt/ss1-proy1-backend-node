@@ -31,7 +31,7 @@ export class UserService {
     const user = this.userRepository.create({
       ...createUserDto,
       password_hash,
-      userTypeId: role === Role.ADMIN ? 2 : 1, // Based on your initial data
+      user_type_id: role === Role.ADMIN ? 2 : 1, 
     });
 
     return this.userRepository.save(user);

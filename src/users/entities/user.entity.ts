@@ -22,11 +22,11 @@ export class User {
   @Column()
   password_hash: string;
 
-  @Column({ name: 'user_type_id' })
-  userTypeId: number;
+  @Column()
+  user_type_id: number;
 
-  @Column({ name: 'gender_id', nullable: true })
-  genderId: number | null;
+  @Column({ nullable: true })
+  gender_id: number | null;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string | null;
