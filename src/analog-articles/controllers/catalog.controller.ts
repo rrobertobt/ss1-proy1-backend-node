@@ -2,12 +2,22 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AnalogArticleService } from '../services/analog-article.service';
 import { AnalogArticleListResponseDto } from '../dto/analog-article-list-response.dto';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { VinylCategoryService } from '../services/vinyl-category.service';
+import { VinylSpecialEditionService } from '../services/vinyl-special-edition.service';
+import { CassetteCategoryService } from '../services/cassette-category.service';
+import { VinylCategoryResponseDto } from '../dto/vinyl-category-response.dto';
+import { VinylSpecialEditionResponseDto } from '../dto/vinyl-special-edition-response.dto';
+import { CassetteCategoryResponseDto } from '../dto/cassette-category-response.dto';
 
 @ApiTags('Catalog Articles')
 @Controller('catalog')
 export class CatalogController {
-  constructor(private readonly analogArticleService: AnalogArticleService) {}
+  constructor(
+    private readonly analogArticleService: AnalogArticleService,
+    private readonly vinylCategoryService: VinylCategoryService,
+    private readonly vinylSpecialEditionService: VinylSpecialEditionService,
+    private readonly cassetteCategoryService: CassetteCategoryService,
+  ) {}
 
   @Get('articles')
   @ApiOperation({ 
@@ -81,5 +91,80 @@ export class CatalogController {
   async findAll(): Promise<{ data: AnalogArticleListResponseDto }> {
     const result = await this.analogArticleService.findAll();
     return { data: result };
+  }
+
+  @Get('vinyl-categories')
+  @ApiOperation({ 
+    summary: 'Get all vinyl categories',
+    description: 'Retrieves a list of all vinyl categories with their details.'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of vinyl categories retrieved successfully.',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/VinylCategoryResponseDto'
+          }
+        }
+      }
+    }
+  })
+  async findAllVinylCategories(): Promise<{ data: VinylCategoryResponseDto[] }> {
+    const vinylCategories = await this.vinylCategoryService.findAll();
+    return { data: vinylCategories };
+  }
+
+  @Get('vinyl-special-editions')
+  @ApiOperation({ 
+    summary: 'Get all vinyl special editions',
+    description: 'Retrieves a list of all vinyl special editions with their details.'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of vinyl special editions retrieved successfully.',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/VinylSpecialEditionResponseDto'
+          }
+        }
+      }
+    }
+  })
+  async findAllVinylSpecialEditions(): Promise<{ data: VinylSpecialEditionResponseDto[] }> {
+    const vinylSpecialEditions = await this.vinylSpecialEditionService.findAll();
+    return { data: vinylSpecialEditions };
+  }
+
+  @Get('cassette-categories')
+  @ApiOperation({ 
+    summary: 'Get all cassette categories',
+    description: 'Retrieves a list of all cassette categories with their details.'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of cassette categories retrieved successfully.',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/CassetteCategoryResponseDto'
+          }
+        }
+      }
+    }
+  })
+  async findAllCassetteCategories(): Promise<{ data: CassetteCategoryResponseDto[] }> {
+    const cassetteCategories = await this.cassetteCategoryService.findAll();
+    return { data: cassetteCategories };
   }
 }
