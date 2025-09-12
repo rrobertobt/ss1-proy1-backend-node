@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ArtistsModule } from './artists/artists.module';
+import { GenreModule } from './genres/genres.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ArtistsModule } from './artists/artists.module';
     AuthModule,
     UsersModule,
     ArtistsModule,
+    GenreModule
     // OrdersModule
   ],
   controllers: [AppController],
