@@ -13,11 +13,11 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.use((req, res, next) => {
-    res.header('Content-Type', 'application/json');
-    res.header('Accept', 'application/json');
-    next();
-  });
+  // app.use((req, res, next) => {
+  //   res.header('Content-Type', 'application/json');
+  //   res.header('Accept', 'application/json');
+  //   next();
+  // });
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
