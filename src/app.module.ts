@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ArtistsModule } from './artists/artists.module';
 import { GenreModule } from './genres/genres.module';
+import { AnalogArticlesModule } from './analog-articles/analog-articles.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { GenreModule } from './genres/genres.module';
     AuthModule,
     UsersModule,
     ArtistsModule,
-    GenreModule
+    GenreModule,
+    AnalogArticlesModule
     // OrdersModule
   ],
   controllers: [AppController],
