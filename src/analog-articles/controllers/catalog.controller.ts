@@ -10,8 +10,6 @@ export class CatalogController {
   constructor(private readonly analogArticleService: AnalogArticleService) {}
 
   @Get('articles')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Get all analog articles',
     description: 'Retrieves a list of all analog articles with their artist, genre, and currency information.'
