@@ -193,6 +193,63 @@ export class CartService {
     };
   }
 
+  async updateCartItemQuantity(userId: number, itemId: number, newQuantity: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const cart = await this.shoppingCartRepository.findOne({
+        where: { user_id: userId },
+      });
+
+      if (!cart) {
+        throw new NotFoundException('Shopping cart not found');
+      }
+
+      const cartItem = await this.cartItemRepository.findOne({
+        where: { id: itemId, shopping_cart_id: cart.id },
+        relations: ['article'],
+      });
+
+      if (!cartItem) {
+        throw new NotFoundException('Cart item not found');
+      }
+
+      // Check if there's enough stock for the new quantity
+      if (cartItem.article.stock_quantity < newQuantity) {
+        throw new BadRequestException(
+          `Insufficient stock. Available: ${cartItem.article.stock_quantity}, Requested: ${newQuantity}`
+        );
+      }
+
+      // Update the cart item quantity
+      cartItem.quantity = newQuantity;
+      cartItem.updated_at = new Date();
+      await queryRunner.manager.save(cartItem);
+
+      // Update cart totals
+      const cartItems = await queryRunner.manager.find(CartItem, {
+        where: { shopping_cart_id: cart.id },
+      });
+
+      const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+      const subtotal = cartItems.reduce((sum, item) => sum + item.total_price, 0);
+
+      cart.total_items = totalItems;
+      cart.subtotal = subtotal;
+      cart.updated_at = new Date();
+      await queryRunner.manager.save(cart);
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   async removeItemFromCart(userId: number, itemId: number): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();

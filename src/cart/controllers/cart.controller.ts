@@ -2,6 +2,7 @@ import {
   Controller, 
   Post, 
   Get,
+  Put,
   Delete,
   Body, 
   Param,
@@ -25,6 +26,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateCartItemDto } from '../dto/create-cart-item.dto';
 import { CartItemCreatedResponseDto } from '../dto/cart-item-response.dto';
 import { ShoppingCartResponseDto } from '../dto/shopping-cart-response.dto';
+import { UpdateCartItemQuantityDto } from '../dto/update-cart-item-quantity.dto';
 import { Role } from 'src/common/enums/role.enum';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 
@@ -333,6 +335,80 @@ export class CartController {
     }
     
     return { data: cartData };
+  }
+
+  @Put('items/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ 
+    summary: 'Update cart item quantity',
+    description: 'Updates the quantity of a specific item in the user\'s shopping cart.'
+  })
+  @ApiBody({ 
+    type: UpdateCartItemQuantityDto,
+    description: 'The new quantity for the cart item'
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Cart item quantity updated successfully.'
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid item ID, invalid quantity, or insufficient stock.',
+    schema: {
+      type: 'object',
+      properties: {
+        status_code: { type: 'number', example: 400 },
+        message: { 
+          type: 'string', 
+          example: 'Insufficient stock. Available: 5, Requested: 10' 
+        },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing authentication token.',
+    schema: {
+      type: 'object',
+      properties: {
+        status_code: { type: 'number', example: 401 },
+        message: { type: 'string', example: 'Unauthorized' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Cart item not found.',
+    schema: {
+      type: 'object',
+      properties: {
+        status_code: { type: 'number', example: 404 },
+        message: { 
+          type: 'string', 
+          example: 'Cart item not found' 
+        },
+        error: { type: 'string', example: 'Not Found' }
+      }
+    }
+  })
+  async updateCartItemQuantity(
+    @Request() req: any,
+    @Param('id') itemId: string,
+    @Body() updateCartItemQuantityDto: UpdateCartItemQuantityDto
+  ): Promise<void> {
+    const userId = req.user.id;
+    const itemIdNumber = parseInt(itemId, 10);
+    
+    if (isNaN(itemIdNumber) || itemIdNumber <= 0) {
+      throw new BadRequestException('Invalid item ID');
+    }
+    
+    await this.cartService.updateCartItemQuantity(
+      userId, 
+      itemIdNumber, 
+      updateCartItemQuantityDto.quantity
+    );
   }
 
   @Delete('items/:id')
