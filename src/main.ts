@@ -46,7 +46,6 @@ async function bootstrap() {
     .setTitle('Vinyl Store API')
     .setDescription('API Documentation for Vinyl Store Backend')
     .setVersion('1.0')
-    .addServer('/api/v1', 'API v1')
     .addBearerAuth()
     .build();
 
