@@ -38,6 +38,8 @@ export class CartService {
         throw new BadRequestException(`Article "${article.title}" is not available`);
       }
 
+      // Soft stock validation: Only prevent adding more than available stock
+      // Don't reserve stock - multiple users can have the same item in their carts
       if (article.stock_quantity < createCartItemDto.quantity) {
         throw new BadRequestException(
           `Insufficient stock. Available: ${article.stock_quantity}, Requested: ${createCartItemDto.quantity}`
@@ -72,6 +74,8 @@ export class CartService {
         // Update existing item quantity
         const newQuantity = existingCartItem.quantity + createCartItemDto.quantity;
         
+        // Soft validation: Allow as long as total requested doesn't exceed available stock
+        // Note: This doesn't account for what other users have in their carts
         if (article.stock_quantity < newQuantity) {
           throw new BadRequestException(
             `Insufficient stock. Available: ${article.stock_quantity}, Total requested: ${newQuantity}`
@@ -324,5 +328,98 @@ export class CartService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  /**
+   * Validates cart items against current stock levels for checkout
+   * This is the "hard validation" that happens at order creation time
+   * Returns items that are no longer available or have insufficient stock
+   */
+  async validateCartForCheckout(userId: number): Promise<{
+    isValid: boolean;
+    invalidItems: Array<{
+      itemId: number;
+      articleId: number;
+      title: string;
+      requestedQuantity: number;
+      availableStock: number;
+      issue: 'unavailable' | 'insufficient_stock';
+    }>;
+  }> {
+    const cart = await this.shoppingCartRepository.findOne({
+      where: { user_id: userId },
+      relations: ['items', 'items.article'],
+    });
+
+    if (!cart || !cart.items.length) {
+      return { isValid: true, invalidItems: [] };
+    }
+
+    const invalidItems: Array<{
+      itemId: number;
+      articleId: number;
+      title: string;
+      requestedQuantity: number;
+      availableStock: number;
+      issue: 'unavailable' | 'insufficient_stock';
+    }> = [];
+
+    for (const item of cart.items) {
+      const article = item.article;
+      
+      if (!article.is_available) {
+        invalidItems.push({
+          itemId: item.id,
+          articleId: article.id,
+          title: article.title,
+          requestedQuantity: item.quantity,
+          availableStock: article.stock_quantity,
+          issue: 'unavailable',
+        });
+      } else if (article.stock_quantity < item.quantity) {
+        invalidItems.push({
+          itemId: item.id,
+          articleId: article.id,
+          title: article.title,
+          requestedQuantity: item.quantity,
+          availableStock: article.stock_quantity,
+          issue: 'insufficient_stock',
+        });
+      }
+    }
+
+    return {
+      isValid: invalidItems.length === 0,
+      invalidItems,
+    };
+  }
+
+  /**
+   * Prepares cart data for order creation
+   * Should be called only after validateCartForCheckout passes
+   */
+  async getCartItemsForOrder(userId: number): Promise<Array<{
+    articleId: number;
+    quantity: number;
+    unitPrice: number;
+    discountApplied: number;
+    cdPromotionId?: number;
+  }>> {
+    const cart = await this.shoppingCartRepository.findOne({
+      where: { user_id: userId },
+      relations: ['items'],
+    });
+
+    if (!cart) {
+      throw new NotFoundException('Shopping cart not found');
+    }
+
+    return cart.items.map(item => ({
+      articleId: item.analog_article_id,
+      quantity: item.quantity,
+      unitPrice: item.unit_price,
+      discountApplied: item.discount_applied,
+      cdPromotionId: item.cd_promotion_id,
+    }));
   }
 }
