@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { UserType } from './user-type.entity';
+import { Gender } from './gender.entity';
 
 @Entity({ name: 'user' })
 export class User {
@@ -24,16 +25,32 @@ export class User {
   @Column({ name: 'user_type_id' })
   userTypeId: number;
 
+  @Column({ name: 'gender_id', nullable: true })
+  genderId: number | null;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  phone: string | null;
+
+  @Column({ type: 'boolean', default: true })
+  is_active: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  is_verified: boolean;
+
   @ManyToOne(() => UserType, (userType) => userType.users)
   @JoinColumn({ name: 'user_type_id' })
   type: UserType;
 
-  @Column({ default: true })
-  is_active: boolean;
-
-  @Column({ default: false })
-  is_verified: boolean;
+  @ManyToOne(() => Gender)
+  @JoinColumn({ name: 'gender_id' })
+  gender: Gender;
 
   @Column({ type: 'timestamp', nullable: true })
   last_login: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updated_at: Date;
 }

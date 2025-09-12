@@ -22,7 +22,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       id: payload.sub, 
       username: payload.username,
       email: payload.email,
-      type: payload.type
+      type: {
+        name: payload.type // This matches what RolesGuard expects
+      }
     };
   }
 }

@@ -62,4 +62,30 @@ export class UserService {
 
     return user;
   }
+
+  async findAll(page: number = 0, limit: number = 10): Promise<{ data: User[], total: number }> {
+    const [users, total] = await this.userRepository.findAndCount({
+      relations: ['type', 'gender'],
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        phone: true,
+        is_active: true,
+        is_verified: true
+      },
+      skip: page * limit,
+      take: limit,
+      order: {
+        id: 'DESC'
+      }
+    });
+
+    return {
+      data: users,
+      total
+    };
+  }
 }
