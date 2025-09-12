@@ -3,20 +3,16 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { CountriesService } from '../services/countries.service';
 import { Country } from '../entities/country.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { Role } from '../enums/role.enum';
 
 @ApiTags('countries')
-@Controller('countries')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
+@Controller('catalogs/countries')
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class CountriesController {
   constructor(private readonly countriesService: CountriesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all countries (Admin only)' })
+  @ApiOperation({ summary: 'Get all countries' })
   @ApiResponse({
     status: 200,
     description: 'List of all countries',
@@ -25,10 +21,6 @@ export class CountriesController {
   @ApiResponse({
     status: 401,
     description: 'Unauthorized - Authentication required',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - Admin role required',
   })
   findAll(): Promise<Country[]> {
     return this.countriesService.findAll();
