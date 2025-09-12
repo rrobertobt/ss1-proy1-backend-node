@@ -11,6 +11,7 @@ import { ArtistsModule } from './artists/artists.module';
 import { GenreModule } from './genres/genres.module';
 import { AnalogArticlesModule } from './analog-articles/analog-articles.module';
 import { CartModule } from './cart/cart.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { CartModule } from './cart/cart.module';
     ArtistsModule,
     GenreModule,
     AnalogArticlesModule,
-    CartModule
+    CartModule,
+    CommonModule
     // OrdersModule
   ],
   controllers: [AppController],

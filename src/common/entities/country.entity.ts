@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'country' })
 export class Country {
@@ -15,7 +16,7 @@ export class Country {
   @Column({ name: 'country_code' })
   country_code: string;
 
-  @ApiProperty({ example: 1, description: 'The ID of the currency used in this country' })
+  @Exclude()
   @Column({ name: 'currency_id' })
   currency_id: number;
 }

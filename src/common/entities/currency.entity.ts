@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'currency' })
 export class Currency {
@@ -19,7 +20,7 @@ export class Currency {
   @Column({ type: 'varchar', length: 10, nullable: true })
   symbol: string | null;
 
-  @ApiProperty({ description: 'Creation timestamp' })
+  @Exclude()
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 }
