@@ -7,6 +7,9 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Set global prefix for all routes
+  app.setGlobalPrefix('api/v1');
+
   app.enableCors({
     origin: process.env.FRONTEND_URL || '*', 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -43,16 +46,18 @@ async function bootstrap() {
     .setTitle('Vinyl Store API')
     .setDescription('API Documentation for Vinyl Store Backend')
     .setVersion('1.0')
+    .addServer('/api/v1', 'API v1')
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/v1/docs', app, document);
 
   // Start the server
   const port = process.env.PORT || 3000;
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger documentation available at: http://localhost:${port}/api`);
+  console.log(`API available at: http://localhost:${port}/api/v1`);
+  console.log(`Swagger documentation available at: http://localhost:${port}/api/v1/docs`);
 }
 bootstrap();
