@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AnalogArticleController } from './controllers/analog-article.controller';
+import { AdminCatalogController } from './controllers/admin-catalog.controller';
+import { CatalogController } from './controllers/catalog.controller';
 import { AnalogArticleService } from './services/analog-article.service';
 import { AnalogArticle } from './entities/analog-article.entity';
 import { Cd } from './entities/cd.entity';
@@ -18,7 +19,7 @@ import { Currency } from '../common/entities/currency.entity';
       Currency,
     ]),
   ],
-  controllers: [AnalogArticleController],
+  controllers: [AdminCatalogController, CatalogController],
   providers: [AnalogArticleService],
   exports: [AnalogArticleService],
 })
