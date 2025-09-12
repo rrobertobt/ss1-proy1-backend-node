@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { ArtistsModule } from './artists/artists.module';
 import { GenreModule } from './genres/genres.module';
 import { AnalogArticlesModule } from './analog-articles/analog-articles.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { AnalogArticlesModule } from './analog-articles/analog-articles.module';
     UsersModule,
     ArtistsModule,
     GenreModule,
-    AnalogArticlesModule
+    AnalogArticlesModule,
+    CartModule
     // OrdersModule
   ],
   controllers: [AppController],
