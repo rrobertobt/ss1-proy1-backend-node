@@ -11,14 +11,33 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.usersService.findByUsername(username);
-    
-    if (user && await bcrypt.compare(password, user.password_hash)) {
-      const { password_hash, ...result } = user;
-      return result;
+    try {
+      const user = await this.usersService.findByUsername(username);
+      
+      if (user && await bcrypt.compare(password, user.password_hash)) {
+        // Check if user account is active
+        if (!user.is_active) {
+          throw new UnauthorizedException('Account is disabled. Please contact support.');
+        }
+        
+        // Check if user is banned
+        if (user.is_banned) {
+          throw new UnauthorizedException('Account has been banned. Please contact support.');
+        }
+        
+        const { password_hash, ...result } = user;
+        return result;
+      }
+      
+      return null;
+    } catch (error) {
+      // If user not found, return null to indicate invalid credentials
+      if (error.message === 'User not found') {
+        return null;
+      }
+      // Re-throw other errors (like UnauthorizedException)
+      throw error;
     }
-    
-    return null;
   }
 
   async login(user: any) {

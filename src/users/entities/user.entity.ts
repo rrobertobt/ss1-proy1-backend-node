@@ -37,6 +37,12 @@ export class User {
   @Column({ type: 'boolean', default: false })
   is_verified: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  is_2fa_enabled: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  is_banned: boolean;
+
   @ManyToOne(() => UserType, (userType) => userType.users)
   @JoinColumn({ name: 'user_type_id' })
   type: UserType;
